@@ -2,14 +2,10 @@ import streamlit as st
 import datetime
 import os
 
-#保存用フォルダの設定
 DIARY_FOLDER = "my_diaries"
 os.makedirs(DIARY_FOLDER, exist_ok=True)
 
-# ここから関数---------------------------------------------------------------
-
 def get_diary_filepath(date_str):
-    #ファイルの場所を返す関数
     return os.path.join(DIARY_FOLDER, f"{date_str}.txt")
 
 def load_diary_content(date_str):
@@ -21,9 +17,7 @@ def load_diary_content(date_str):
 
 def save_diary_content(date_str, content):
     filepath = get_diary_filepath(date_str)
-    #openでファイルを開き、wで書き込む。開いたファイルオブジェクトを f という変数名で扱えるように
     with open(filepath, "w", encoding="utf-8") as f:
-        #ファイルにcontentを書き込む
         f.write(content)
 
 def get_all_recorded_dates():
@@ -38,7 +32,6 @@ def get_all_recorded_dates():
     return sorted(list(dates), reverse=True)
 
 def display_diary_entry(date_obj, is_expanded=False):
-    #この関数は特定の日付の日記を表示するためのもの
     date_str = date_obj.strftime("%Y-%m-%d")
     diary_content = load_diary_content(date_str)
 
@@ -48,45 +41,54 @@ def display_diary_entry(date_obj, is_expanded=False):
     else:
         st.info(f"{date_obj.strftime('%Y年%m月%d日')} にはまだ日記が書かれていません。")
 
-# ----------------------------------------------------------------
-
 st.set_page_config(layout="wide", page_title="シンプル日記アプリ")
+st.title("📔日記アプリ")
 
-st.title("日記アプリ")
 view_mode_date_str = st.query_params.get("view_date")
+is_view_mode = bool(view_mode_date_str)
 
+
+### サイドバー
 
 st.sidebar.header("過去の日記を閲覧")
 available_dates = get_all_recorded_dates()
 
 if available_dates:
-    selected_date_for_view = st.sidebar.selectbox(
+    sidebar_initial_index = 0
+    if is_view_mode:
+        #このif文は、URLから日付を取得して、サイドバーの初期選択を設定するためのもの
+        try:
+            date_from_url = datetime.datetime.strptime(view_mode_date_str, "%Y-%m-%d").date()
+            if date_from_url in available_dates:
+                sidebar_initial_index = available_dates.index(date_from_url)
+        except ValueError:
+            pass
+
+    st.sidebar.selectbox(
         "閲覧したい日付を選んでください:",
         available_dates,
+        index=sidebar_initial_index,
         format_func=lambda d: d.strftime("%Y年%m月%d日"),
-        key ="sidebar_date_selector" # キーを slider_date_selector から変更
+        key="sidebar_date_selector",
+        on_change=lambda: st.query_params.update({"view_date": st.session_state.sidebar_date_selector.strftime("%Y-%m-%d")}) and st.rerun()
     )
-    
-    if selected_date_for_view: 
-        # query_paramsを設定すると、Streamlitはページを再実行し、メインコンテンツが切り替わる
-        st.query_params["view_date"] = selected_date_for_view.strftime("%Y-%m-%d")
 else:
     st.sidebar.info("まだ日記が保存されていません。")
 
-# main-content-------------------------------------------------
-if view_mode_date_str:
+### メインコンテンツ
+
+if is_view_mode:
     display_date_obj = datetime.datetime.strptime(view_mode_date_str, '%Y-%m-%d').date()
     
     st.subheader(f"{display_date_obj.strftime('%Y年%m月%d日')} の日記")
-    display_diary_entry(display_date_obj, is_expanded=True) # 常に展開して表示
+    display_diary_entry(display_date_obj, is_expanded=True)
 
-    if st.button("日記一覧に戻る"): 
-        st.query_params.clear() # URLのクエリパラメータをクリア
-        st.rerun() #強制的にホームへ
+    if st.button("日記一覧に戻る", key="back_to_edit_button_view_mode"): 
+        st.query_params.clear()
+        st.rerun()
     
 else:
-    # URLパラメータがない場合（通常の日記入力/過去の日記一覧モード）
-    current_selected_date = st.date_input("日付を選んでください:", value=datetime.date.today())
+    current_selected_date = st.date_input("日付を選んでください:", value=datetime.date.today(), key="main_date_input")
     current_date_str = current_selected_date.strftime("%Y-%m-%d")
 
     if f"diary_text_{current_date_str}" not in st.session_state:
@@ -119,10 +121,9 @@ else:
         else:
             st.write("とても充実した内容ですね！詳細な記録、お疲れ様でした。")
 
-        # 保存後、その日の日記をすぐに表示（展開）
-        display_diary_entry(current_selected_date, is_expanded=True) #is_expanded=Trueは展開して表示するため
+        display_diary_entry(current_selected_date, is_expanded=True)
+
     else:
-        # 保存ボタンが押されていない場合、現在の編集中の記録を表示
         st.markdown("---")
         st.subheader("あなたへのメッセージ")
         st.write("今日の出来事を記録してみませんか？")
@@ -131,10 +132,11 @@ else:
     st.header("全ての過去の日記")
 
     all_recorded_dates_for_display = get_all_recorded_dates()
-    if all_recorded_dates_for_display: # 過去の日記が存在する場合
+    if all_recorded_dates_for_display:
         for date_obj in all_recorded_dates_for_display:
             if date_obj == current_selected_date:
                 continue
-            display_diary_entry(date_obj, is_expanded=False) # デフォルトは閉じる
+            display_diary_entry(date_obj, is_expanded=False)
     else:
         st.info("まだ過去の日記がありません。")
+  
