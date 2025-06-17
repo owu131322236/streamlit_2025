@@ -5,6 +5,14 @@ import os
 DIARY_FOLDER = "my_diaries"
 os.makedirs(DIARY_FOLDER, exist_ok=True)
 
+EMOTION_ICONS = {
+    0: "最悪 😩",
+    1: "悪い 😔",
+    2: "普通 😐",
+    3: "良い 😊",
+    4: "最高 🤩"
+}
+
 def get_diary_filepath(date_str):
     return os.path.join(DIARY_FOLDER, f"{date_str}.txt")
 
@@ -101,9 +109,27 @@ else:
         key=f"diary_editor_{current_date_str}"
     )
 
+    selected_emotion = st.slider(
+        "今日の気分はどうでしたか？",
+        min_value=0,
+        max_value=4,
+        value=2, # 初期値は「普通」
+        step=1,
+        key=f"emotion_slider_{current_date_str}"
+    )
+
     if st.button("日記を保存", key=f"save_button_{current_date_str}"):
-        save_diary_content(current_date_str, diary_text_input)
-        st.session_state[f"diary_text_{current_date_str}"] = diary_text_input
+        final_diary_content = diary_text_input.strip() # 余白を削除
+        emotion_string = EMOTION_ICONS.get(selected_emotion, "不明") # 選択された感情の文字列を取得      
+        # 既存の内容に感情情報が既にある場合は、古いものを削除
+        for icon_text in EMOTION_ICONS.values():
+            if icon_text in final_diary_content:
+                final_diary_content = final_diary_content.replace(icon_text, "").strip()
+                break # 
+        final_diary_content += f"\n\n感情レベル: {emotion_string}"
+
+        save_diary_content(current_date_str, final_diary_content)
+        st.session_state[f"diary_text_{current_date_str}"] = final_diary_content
         
         st.success("日記を保存しました！")
 
