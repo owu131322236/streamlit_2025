@@ -51,19 +51,83 @@ def display_diary_entry(date_obj, is_expanded=False):
 def custom_css():
     st.markdown(
         """<style>
-        :root {
-        --primaryColor: #3872fb;
-        --backgroundColor: #FDFBF6;
-        --secondaryBackgroundColor: #E0E6E9;
-        --textColor: #5A5A5A;
-        --font: monospace;
+        .stApp {
+            background-color: #FDFBF6; 
+            color: #5A5A5A; 
+            font-family: monospace; 
+        }
+        /* Streamlitのボタン、ダウンロードボタン、リンクボタン */
+        .stButton button, .stDownloadButton button, .stLinkButton a {
+            background-color: #3872fb; 
+            color: white; 
+            border-color: #3872fb; 
+        }
+        .stButton button:hover, .stDownloadButton button:hover, .stLinkButton a:hover {
+            background-color: #2b5ac5;
+            border-color: #2b5ac5;
+        }
+        .stSlider [data-testid="stThumbValue"], 
+        .stSlider [data-testid="stSliderHandle"] { 
+            background-color: #3872fb; 
+        }
+        .stSlider [data-testid="stSliderTrack"] { 
+            background-color: #E0E6E9;
+        }
+        .stSlider [data-testid="stSliderTrackFilled"] { 
+            background-color: #3872fb;
         }
 
-        body {
-        background-color: var(--backgroundColor);
-        color: var(--textColor);
-        font-family: var(--font);
+
+        /* テキストエリアのスタイル */
+        textarea {
+            background-color: #FDFBF6; 
+            color: #5A5A5A; 
+            border-radius: 5px;
+            border: 1px solid #E0E6E9; 
         }
+
+        .stDateInput div[data-testid="stDateInput"] > div {
+            background-color: #FDFBF6; 
+            border-radius: 5px;
+            border: 1px solid #E0E6E9; 
+        }
+        .stDateInput input {
+             color: #5A5A5A; 
+        }
+
+
+        /* 見出しの色 */
+        h1, h2, h3, h4, h5, h6 {
+            color: #3872fb; 
+            font-family: monospace; 
+        }
+        
+        /* メッセージボックス */
+        div[data-testid="stInfo"], div[data-testid="stSuccess"], div[data-testid="stWarning"], div[data-testid="stError"] {
+            background-color: #E0E6E9; 
+            color: #5A5A5A; 
+            border-left: 5px solid #3872fb; 
+            border-radius: 5px;
+        }
+
+        /* タイトル付近 */
+        .streamlit-expanderHeader {
+            background-color: #E0E6E9; 
+            color: #5A5A5A; 
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .streamlit-expanderHeader:hover {
+            background-color: #d0d6d9; /* secondaryBackgroundColorより少し濃い色 */
+        }
+
+        /* サイドバーのスタイル */
+        [data-testid="stSidebar"] {
+            background-color: #E0E6E9; /* secondaryBackgroundColor */
+            color: #5A5A5A; /* textColor */
+        }
+
+
         </style>""",unsafe_allow_html = True
     )
 
