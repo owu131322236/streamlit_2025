@@ -48,6 +48,26 @@ def display_diary_entry(date_obj, is_expanded=False):
             st.write(diary_content)
     else:
         st.info(f"{date_obj.strftime('%Y年%m月%d日')} にはまだ日記が書かれていません。")
+def custom_css():
+    st.markdown(
+        """<style>
+        :root {
+        --primaryColor: #3872fb;
+        --backgroundColor: #FDFBF6;
+        --secondaryBackgroundColor: #E0E6E9;
+        --textColor: #5A5A5A;
+        --font: monospace;
+        }
+
+        body {
+        background-color: var(--backgroundColor);
+        color: var(--textColor);
+        font-family: var(--font);
+        }
+        </style>""",unsafe_allow_html = True
+    )
+
+custom_css()
 
 st.set_page_config(layout="wide", page_title="シンプル日記アプリ")
 st.title("📔日記アプリ")
